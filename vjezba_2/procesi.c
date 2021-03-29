@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
 
     printf("\n\tVarijabla A na kraju = %d\n", *A);
     
-    shmdt((int *) A);
+    shmdt((char *) A);
     shmctl(processId, IPC_RMID, NULL);
 
     return 0;
