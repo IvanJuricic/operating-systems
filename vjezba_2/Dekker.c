@@ -9,9 +9,41 @@
 
 #define NUMPROCESS 2
 
-int *pravo, *zastavica, *A, processId;
+int segmentId, *pravo, *zastavica, *A, numOfIterations, processId;
 
-int main() {
+void into_cs(int i, int j) {
+
+    zastavica[i] = 1;
+    while(zastavica[j] != 0) {
+        if(*pravo == j) {
+            zastavica[i] = 0;
+            while(*pravo == j);
+            zastavica[i] = 1;
+        }
+    }
+}
+
+void exit_cs(int i, int j) {
+    *pravo = j;
+    zastavica[i] = 0;
+}
+
+void processIncrement(int i) {
+    
+    into_cs(i, 1 - i);
+    for(int j = 0; j < numOfIterations; j++) *A+=1;
+    exit_cs(i, 1 - i);
+        //sleep(1);
+}
+
+int main(int argc, char *argv[]) {
+
+    if(argc != 2) {
+        printf("\n\tUsage:    %s broj_iteracija\n", argv[0]);
+        exit(1);
+    }
+
+    numOfIterations = atoi(argv[1]);
 
     segmentId = shmget(IPC_PRIVATE, sizeof(int), 0600);
     if( segmentId == -1) exit(1);
@@ -34,7 +66,7 @@ int main() {
                 exit(1);
                 
             case 0:
-                processIncrement();
+                processIncrement(i);
                 exit(0);
             
             default:
