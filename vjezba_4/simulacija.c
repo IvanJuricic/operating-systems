@@ -16,9 +16,9 @@ struct Rupa {
 
 void ispisi_stanje(int *spremnik, int velicina_spremnika);
 void napuni_spremnik(int *spremnik, int velicina_spremnika, int *zahtjev, int velicina_zahtjeva);
-void oslobodi_zahtjev(int *spremnik, int zahtjev);
+void oslobodi_zahtjev(int *spremnik, int velicina_spremnika, int zahtjev);
 void isprazni_spremnik(int *spremnik, int velicina_spremnika);
-int provjeri_spremnik(int *spremnik, int velicina_spremnika);
+int provjeri_spremnik(int *spremnik, int velicina_spremnika, int velicina_zahtjeva);
 struct Rupa provjeri_slobodno(int *spremnik, int velicina_spremnika, int velicina_zahtjeva);
 int slucajan_broj(int d, int g);
 
@@ -75,9 +75,11 @@ int main(int argc, char *argv[]) {
 
 		} else if (naredba == 'O' || naredba == 'o') {
 			// Oslobadanje zahtjeva
-			oslobadanje = getchar();
+			printf("\n\tUnesite zahtjev koji zelite osloboditi => ");
+			scanf(" %c", &oslobadanje);
 
-			oslobodi_zahtjev(mem, oslobadanje);
+			oslobodi_zahtjev(mem, *velicina_spremnika, oslobadanje);
+			ispisi_stanje(mem, *velicina_spremnika);
 
 			printf("\nUnesite naredbu => ");
 
@@ -109,7 +111,7 @@ void isprazni_spremnik(int *spremnik, int velicina_spremnika) {
 	}
 }
 
-int provjeri_spremnik(int *spremnik, int velicina_spremnika) {
+int provjeri_spremnik(int *spremnik, int velicina_spremnika, int velicina_zahtjeva) {
 
 	int tmp = 0;
 	for(int i = 0; i < velicina_spremnika; i++) {
@@ -141,21 +143,31 @@ void ispisi_stanje(int *spremnik, int velicina_spremnika) {
 
 void napuni_spremnik(int *spremnik, int velicina_spremnika, int *zahtjev, int velicina_zahtjeva) {
 
-	if(provjeri_spremnik(spremnik, velicina_spremnika)) {
+	if(provjeri_spremnik(spremnik, velicina_spremnika, velicina_zahtjeva)) {
 		
 		if(*zahtjev == 10) *zahtjev = 0;
 		char tmp = *zahtjev;
 		struct Rupa rupa;
-		
+		int br = 0;
+
 		rupa = provjeri_slobodno(spremnik, velicina_spremnika, velicina_zahtjeva);
 		//printf("dobivena rupa ==> %d, %d\n", rupa.id, rupa.num);
 
+		/*if(rupa.id == -1) {
+			printf("\n\tNema dovoljno prostora u spremniku\n");
+			return;
+		}*/
+
 		printf("\n\tPunjenje spremnika zahtjevom %d\n", *zahtjev);
-		printf("\n\tPunim od pozicije %d.\n", rupa.id);
 		
-		for(int i = rupa.id; i < velicina_zahtjeva; i++ ) {
-			spremnik[i] = tmp + '0';
+		while(br != velicina_zahtjeva) {
+			spremnik[rupa.id] = tmp + '0';
+			rupa.id++;
+			br++;
 		}
+		/*for(int i = rupa.id; i < velicina_zahtjeva; i++ ) {
+			spremnik[rupa.id] = tmp + '0';
+		}*/
 
 		*zahtjev += 1;
 	
@@ -165,26 +177,13 @@ void napuni_spremnik(int *spremnik, int velicina_spremnika, int *zahtjev, int ve
 
 }
 
-void oslobodi_zahtjev(int *spremnik, int zahtjev) {
+void oslobodi_zahtjev(int *spremnik, int velicina_spremnika, int zahtjev) {
 
 	printf("\n\tOslobadanje zahtjeva %d\n", zahtjev);
 
-	/*char tmp = *zahtjev;
-	if(tmp == 45) {
-	
-		tmp = '-';
-		for(int i = 0; i < velicina_spremnika; i++ ) {
-			spremnik[i] = tmp;
-		}
-
-	} else {
-
-		for(int i = 0; i < velicina_spremnika; i++ ) {
-			spremnik[i] = tmp + '0';
-		}
-
-		*zahtjev += 1;
-	}*/
+	for(int i = 0; i < velicina_spremnika; i++) {
+		if(spremnik[i] == zahtjev) spremnik[i] = '-'; 
+	}
 
 }
 
@@ -229,178 +228,8 @@ struct Rupa provjeri_slobodno(int *spremnik, int velicina_spremnika, int velicin
 				min.id = rupe[i].id;
 				min_broj = rupe[i].num;
 			}
-		}
+		} else continue;
 	}
 
 	return min;
 }
-/* 
-
-#include<iostream>
-#include<malloc.h>
-using namespace std;
-
-void printStatus(int *a, int n) {
-	int i;
-	for (i = 1; i < n + 1; i++) {
-		cout << i % 10 << " ";
-	}
-	cout << "\n";
-	for (i = 1; i < n + 1; i++) {
-		cout << a[i-1] << " ";
-	}
-	cout << "\n";
-}
-void setZeros(int *a, int n) {
-	for (int i = 0; i < n; i++) {
-		a[i] = 0;
-	}
-}
-/*
-1234567890123456
-1112000004440005
-    000004440005
-	l1
-
-int zeros(int *p) {
-	int size = 0;
-	int *a = p;
-	do {
-		if (*a == 0) {
-			size++;
-			a = a + 1;
-		}
-		else break;
-	} while (true);
-	return size;
-}
-void defragment(int *a, int n) {
-	//l=&l1	
-	int *o;
-	int br = 0;
-	o= (int*)malloc(sizeof(int) * n);
-	setZeros(o, n);
-	//1100033344005506
-	for (int i = 0; i < n; i++) {
-		if (a[i] != 0) {
-			o[br] = a[i];
-			br++;
-		}
-	}
-	for (int i = 0; i < n; i++)	{
-		a[i] = o[i];
-	}
-	free(o);
-}
-bool location(int *p,int n, int k, int **l) {
-	//  k-size koji zauzimamo, l-lokacija za vracanje
-	bool x = false;
-	int *l1=NULL;
-	int curr,min,all=0;
-	min = 100;
-	
-	for (int  i = 0; i < n; i++){
-		if (p[i] == 0) {
-			if (!x) {
-				curr = zeros(p + i);
-				all += curr;
-				l1 = p + i;
-			}
-			x = true;
-		}else {
-			x = false;
-			curr = 0;
-		}
-		if ((curr < min || min ==0)&& curr!=0) {
-			min = curr;
-			*l = l1;		
-		}
-	}
-	if (all < k) {
-		cout << "nemoze stati\n";
-		return false;
-	}
-	else if (min < k) {
-		cout << "Potrebna defragmentacija za defragmentaciju pritisnite D: "<<endl;
-		return false;
-	}
-	else {
-		return true;
-	}
-
-}
-
-
-void createNewRequest(int *a, int n) {
-	static int reqNum = 1;
-	int size;
-	int *a1 = a;
-	int **l=&a1;// l->l1->0
-	cout << "Koliko lokacija zelite zauzet: ";
-	cin >> size;
-	cout << "\n";
-	if (location(a,n, size,l)) {
-		for (int i = 0; i < size; i++) {
-			*(*l+i) = reqNum;
-		}
-		reqNum++;
-	}
-
-	printStatus(a, n);
-	
-	
-}
-void removeRequest(int *a, int n) {
-	cout << "Koji zahtjev zelite ukloniti: ";
-	int x;
-	cin>> x;
-	cout << "\n";
-	for (int i = 0; i < n; i++) {
-		if (a[i] == x)
-			a[i] = 0;
-	}
-	printStatus(a, n);
-}
-
-
-int main() {
-	int n;
-	int *p;
-	cin >> n;
-	p = (int *)malloc(sizeof(int) * n);
-	setZeros(p, n);
-	printStatus(p, n);
-	char command;
-	while (true) {
-		cout << "Unesite zahtjev: ";
-		cin >> command;
-		cout << "\n";
-
-		switch (command)
-		{
-		case 'Z':
-		case 'z':
-			createNewRequest(p, n);
-			break;
-		case 'O':
-		case 'o':
-			removeRequest(p, n);
-			break;
-		case 'D':
-		case 'd':
-			defragment(p, n);
-			printStatus(p, n);
-			break;
-		case 'K':
-		case 'k':
-			return 0;
-		}
-		
-	}
-	system("PAUSE");
-	return 0;
-}
-
-
-
-*/
