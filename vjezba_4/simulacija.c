@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
 		printf("\n\tGreska prilikom rezerviranje zajednickog spremnika\n");
         exit(1);
 	}
-	
+
 	printf("\n\tPocetno stanje spremnika\n");
 	
 	isprazni_spremnik(mem, *velicina_spremnika);
@@ -101,6 +101,7 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
+
 void isprazni_spremnik(int *spremnik, int velicina_spremnika) {
 	char tmp = '-';
 	for(int i = 0; i < velicina_spremnika; i++ ) {
@@ -146,12 +147,13 @@ void napuni_spremnik(int *spremnik, int velicina_spremnika, int *zahtjev, int ve
 		char tmp = *zahtjev;
 		struct Rupa rupa;
 		
-		//rupa = provjeri_slobodno(spremnik, velicina_spremnika, velicina_zahtjeva);
+		rupa = provjeri_slobodno(spremnik, velicina_spremnika, velicina_zahtjeva);
+		//printf("dobivena rupa ==> %d, %d\n", rupa.id, rupa.num);
 
 		printf("\n\tPunjenje spremnika zahtjevom %d\n", *zahtjev);
-		printf("zahtjev => %c\n", tmp + '0');
-
-		for(int i = 0; i < velicina_zahtjeva; i++ ) {
+		printf("\n\tPunim od pozicije %d.\n", rupa.id);
+		
+		for(int i = rupa.id; i < velicina_zahtjeva; i++ ) {
 			spremnik[i] = tmp + '0';
 		}
 
@@ -192,9 +194,45 @@ int slucajan_broj(int d, int g) {
 
 struct Rupa provjeri_slobodno(int *spremnik, int velicina_spremnika, int velicina_zahtjeva) {
 
-	struct Rupa rupa;
+	struct Rupa rupe[50], min;
+	
+	for(int i = 0; i < 50; i++) {
+		rupe[i].id = 0;
+		rupe[i].num = 0;
+	}
 
-	return rupa;
+	int id = 0, min_broj = 20, j = 0, br = 0;
+
+	while( br != velicina_spremnika ) {
+		if(spremnik[br] == '-') {
+			rupe[j].id = br;
+			while(spremnik[br] == '-') {
+				rupe[j].num++;
+				br++;
+			}
+			if(br == velicina_spremnika) break;
+			j++;
+		}
+		br++;
+	}
+	
+	
+	/*printf("\n\tPopis rupa =====> \n");
+	for(int i = 0; i < velicina_spremnika; i++) {
+		printf("\nID => %d, NUM => %d\n", rupe[i].id, rupe[i].num);
+	}*/
+
+	for(int i = 0; i < velicina_spremnika; i++) {
+		if(rupe[i].num >= velicina_zahtjeva) {
+			if(rupe[i].num <= min_broj) {
+				min.num = rupe[i].num;
+				min.id = rupe[i].id;
+				min_broj = rupe[i].num;
+			}
+		}
+	}
+
+	return min;
 }
 /* 
 
